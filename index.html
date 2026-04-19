@@ -50,6 +50,12 @@
 <button onclick="send()">送信</button>
 
 <script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js")
+    .then(() => console.log("SW登録成功"))
+    .catch(err => console.log("SW登録失敗", err));
+}
+
 // 月
 for (let i = 1; i <= 12; i++) {
   const opt = document.createElement("option");
