@@ -47,8 +47,23 @@
 <h2>欠席連絡</h2>
 
 <input id="name" placeholder="苗字">
-<input id="grade" placeholder="学年">
-<input id="part" placeholder="パート">
+<select id="grade">
+  <option value="">学年を選択</option>
+  <option value="1年">1年</option>
+  <option value="2年">2年</option>
+</select>
+
+<select id="part">
+  <option value="">パートを選択</option>
+  <option value="Fl">Fl</option>
+  <option value="Cl">Cl</option>
+  <option value="Sax">Sax</option>
+  <option value="Tp">Tp</option>
+  <option value="Tb">Tb</option>
+  <option value="Hr">Hr</option>
+  <option value="Bass">Bass</option>
+  <option value="Perc">Perc</option>
+</select>
 
 <label>日付</label><br>
 <select id="month"></select> 月
@@ -58,6 +73,8 @@
   <option value="欠席">欠席</option>
   <option value="遅刻">遅刻</option>
   <option value="早退">早退</option>
+  <option value="ミー早">ミー早</option>
+  <option value="中抜け">中抜け</option>
 </select>
 
 <input id="reason" placeholder="理由">
