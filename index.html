@@ -2,27 +2,83 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Push通知</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon.png">
+  <title>部活アプリ</title>
+
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon.png">
+  <meta name="theme-color" content="#4CAF50">
+
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    input, select, button {
+      margin: 6px 0;
+      padding: 10px;
+      width: 100%;
+      max-width: 320px;
+      font-size: 16px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+    }
+    h2 {
+      margin-top: 30px;
+    }
+  </style>
 </head>
 
 <body>
 
-<h1>通知登録</h1>
+<h1>部活アプリ</h1>
+
+<!-- 通知 -->
+<h2>通知</h2>
 <button onclick="start()">通知を有効化</button>
+
+<hr>
+
+<!-- 欠席フォーム -->
+<h2>欠席連絡</h2>
+
+<input id="name" placeholder="苗字">
+<input id="grade" placeholder="学年">
+<input id="part" placeholder="パート">
+
+<label>日付</label><br>
+<select id="month"></select> 月
+<select id="day"></select> 日<br>
+
+<select id="status">
+  <option value="欠席">欠席</option>
+  <option value="遅刻">遅刻</option>
+  <option value="早退">早退</option>
+</select>
+
+<input id="reason" placeholder="理由">
+
+<button onclick="sendAbsence()">送信</button>
 
 <script>
 const publicKey = "BI3cHWxxzzPjgEI7V4Nw5HIA0lrFWK3PFw0a2LR8qMRIg26GLru9R3jefP15ZJNjVMj9zu_JLkO_2O_knVNd5bI";
 const SERVER_URL = "https://push-server-j72o.onrender.com/subscribe";
 
+// ---------- Service Worker ----------
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js", { scope: "/" })
+    .then(() => console.log("SW登録成功"))
+    .catch(err => console.log("SW登録失敗", err));
+}
+
+// ---------- 通知 ----------
 async function start() {
   const permission = await Notification.requestPermission();
   if (permission !== "granted") return;
 
-  const reg = await navigator.serviceWorker.register("sw.js");
-  await navigator.serviceWorker.ready;
-
+  const reg = await navigator.serviceWorker.ready;
   const convertedKey = urlBase64ToUint8Array(publicKey);
 
   try {
@@ -39,13 +95,75 @@ async function start() {
       body: JSON.stringify(sub)
     });
 
-    alert("登録完了！");
-
+    alert("通知登録完了！");
   } catch (e) {
     alert("エラー: " + e);
   }
 }
 
+// ---------- フォーム初期化 ----------
+for (let i = 1; i <= 12; i++) {
+  const opt = document.createElement("option");
+  opt.value = i;
+  opt.textContent = i;
+  document.getElementById("month").appendChild(opt);
+}
+
+for (let i = 1; i <= 31; i++) {
+  const opt = document.createElement("option");
+  opt.value = i;
+  opt.textContent = i;
+  document.getElementById("day").appendChild(opt);
+}
+
+const today = new Date();
+document.getElementById("month").value = today.getMonth() + 1;
+document.getElementById("day").value = today.getDate();
+
+function pad(n) {
+  return String(n).padStart(2, "0");
+}
+
+// ---------- 欠席送信 ----------
+async function sendAbsence() {
+
+  const name = document.getElementById("name").value.trim();
+  if (!name) {
+    alert("名前を入力してね");
+    return;
+  }
+
+  const month = pad(document.getElementById("month").value);
+  const day = pad(document.getElementById("day").value);
+
+  const data = {
+    name: name,
+    grade: document.getElementById("grade").value,
+    part: document.getElementById("part").value,
+    date: month + "-" + day,
+    status: document.getElementById("status").value,
+    reason: document.getElementById("reason").value
+  };
+
+  try {
+    const res = await fetch("/api/absence", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!res.ok) throw new Error();
+
+    alert("送信成功！");
+  } catch (e) {
+    alert("送信失敗...");
+    console.error(e);
+  }
+}
+
+// ---------- 共通 ----------
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding)
