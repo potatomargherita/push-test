@@ -4,9 +4,11 @@
   <meta charset="UTF-8">
   <title>部活アプリ</title>
 
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/icon.png">
-  <meta name="theme-color" content="#4CAF50">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
     body {
@@ -66,19 +68,14 @@
 const publicKey = "BI3cHWxxzzPjgEI7V4Nw5HIA0lrFWK3PFw0a2LR8qMRIg26GLru9R3jefP15ZJNjVMj9zu_JLkO_2O_knVNd5bI";
 const SERVER_URL = "https://push-server-j72o.onrender.com/subscribe";
 
-// ---------- Service Worker ----------
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js", { scope: "/" })
-    .then(() => console.log("SW登録成功"))
-    .catch(err => console.log("SW登録失敗", err));
-}
-
-// ---------- 通知 ----------
+// ===== 通知（←ここは元のまま）=====
 async function start() {
   const permission = await Notification.requestPermission();
   if (permission !== "granted") return;
 
-  const reg = await navigator.serviceWorker.ready;
+  const reg = await navigator.serviceWorker.register("sw.js");
+  await navigator.serviceWorker.ready;
+
   const convertedKey = urlBase64ToUint8Array(publicKey);
 
   try {
@@ -96,12 +93,15 @@ async function start() {
     });
 
     alert("通知登録完了！");
+
   } catch (e) {
     alert("エラー: " + e);
   }
 }
 
-// ---------- フォーム初期化 ----------
+// ===== フォーム用 =====
+
+// 月
 for (let i = 1; i <= 12; i++) {
   const opt = document.createElement("option");
   opt.value = i;
@@ -109,6 +109,7 @@ for (let i = 1; i <= 12; i++) {
   document.getElementById("month").appendChild(opt);
 }
 
+// 日
 for (let i = 1; i <= 31; i++) {
   const opt = document.createElement("option");
   opt.value = i;
@@ -116,15 +117,17 @@ for (let i = 1; i <= 31; i++) {
   document.getElementById("day").appendChild(opt);
 }
 
+// 今日をデフォルト
 const today = new Date();
 document.getElementById("month").value = today.getMonth() + 1;
 document.getElementById("day").value = today.getDate();
 
+// 0埋め
 function pad(n) {
   return String(n).padStart(2, "0");
 }
 
-// ---------- 欠席送信 ----------
+// 送信
 async function sendAbsence() {
 
   const name = document.getElementById("name").value.trim();
@@ -146,15 +149,13 @@ async function sendAbsence() {
   };
 
   try {
-    const res = await fetch("/api/absence", {
+    await fetch("https://push-server-j72o.onrender.com/api/absence", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(data)
     });
-
-    if (!res.ok) throw new Error();
 
     alert("送信成功！");
   } catch (e) {
@@ -163,7 +164,7 @@ async function sendAbsence() {
   }
 }
 
-// ---------- 共通 ----------
+// ===== 共通 =====
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding)
