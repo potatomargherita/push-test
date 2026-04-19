@@ -160,7 +160,7 @@ async function sendAbsence() {
     name: name,
     grade: document.getElementById("grade").value,
     part: document.getElementById("part").value,
-    date: month + "-" + day,
+    date: "'" + month + "-" + day,
     status: document.getElementById("status").value,
     reason: document.getElementById("reason").value
   };
