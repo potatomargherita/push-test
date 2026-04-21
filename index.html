@@ -35,56 +35,115 @@
 
 <body>
 
-<h1>部活アプリ</h1>
+<!-- ===== メニュー画面 ===== -->
+<div id="menu">
+  <h1>部活アプリ</h1>
+  <button onclick="goForm()">欠席連絡送信</button>
+  <button onclick="goAdmin()">管理者ページ</button>
+</div>
 
-<!-- 通知 -->
-<h2>通知</h2>
-<button onclick="start()">通知を有効化</button>
+<!-- ===== フォーム画面 ===== -->
+<div id="formPage" style="display:none;">
+  <h1>欠席連絡</h1>
 
-<hr>
+  <input id="name" placeholder="名前"><br>
 
-<!-- 欠席フォーム -->
-<h2>欠席連絡</h2>
-
-<input id="name" placeholder="苗字">
-<select id="grade">
-  <option value="">学年を選択</option>
+  <select id="grade">
+  <option value="" selected disabled>学年を選択</option>
   <option value="1年">1年</option>
   <option value="2年">2年</option>
-</select>
+  </select>
+  
 
-<select id="part">
-  <option value="">パートを選択</option>
+  <select id="part">
+  <option value="" selected disabled>パートを選択</option>
   <option value="Fl">Fl</option>
   <option value="Cl">Cl</option>
   <option value="Sax">Sax</option>
-  <option value="Tp">Tp</option>
-  <option value="Tb">Tb</option>
+  <option value="Trp">Trp</option>
+  <option value="Trb">Trb</option>
   <option value="Hr">Hr</option>
   <option value="Bass">Bass</option>
   <option value="Perc">Perc</option>
-</select>
+  </select><br>
 
-<label>日付</label><br>
-<select id="month"></select> 月
-<select id="day"></select> 日<br>
+  月：
+  <select id="month">
+    <option value="" disabled selected>月</option>
+    <script>
+      for (let i = 1; i <= 12; i++) {
+        const m = String(i).padStart(2, "0");
+        document.write(`<option value="${m}">${m}</option>`);
+      }
+    </script>
+  </select>
 
-<select id="status">
-  <option value="欠席">欠席</option>
-  <option value="遅刻">遅刻</option>
-  <option value="早退">早退</option>
-  <option value="ミー早">ミー早</option>
-  <option value="中抜け">中抜け</option>
-</select>
+日：
+  <select id="day">
+    <option value="" disabled selected>日</option>
+    <script>
+      for (let i = 1; i <= 31; i++) {
+        const d = String(i).padStart(2, "0");
+        document.write(`<option value="${d}">${d}</option>`);
+      }
+    </script>
+  </select><br>
 
-<input id="reason" placeholder="理由">
+  <select id="status">
+    <option value="欠席">欠席</option>
+    <option value="遅刻">遅刻</option>
+    <option value="遅刻">早退</option>
+    <option value="遅刻">ミー早</option>
+    <option value="遅刻">中抜け</option>
+  </select><br>
 
-<button onclick="sendAbsence()">送信</button>
+  <input id="reason" placeholder="理由"><br>
+
+  <button onclick="send()">送信</button>
+  <button onclick="goMenu()">戻る</button>
+</div> 
+
+<div id="adminPage" style="display:none;">
+  <h1>管理者ページ</h1>
+
+  <input type="password" id="adminPass" placeholder="パスワード">
+
+  <button onclick="checkPass()">ログイン</button>
+
+  <div id="adminContent" style="display:none;">
+    <h2>管理者機能</h2>
+    <button onclick="start()">通知を有効化</button>
+  </div>
+
+  <button onclick="goMenu()">戻る</button>
+</div>
+
 
 <script>
 const publicKey = "BI3cHWxxzzPjgEI7V4Nw5HIA0lrFWK3PFw0a2LR8qMRIg26GLru9R3jefP15ZJNjVMj9zu_JLkO_2O_knVNd5bI";
 const SERVER_URL = "https://push-server-j72o.onrender.com/subscribe";
 
+// メニュー → フォーム
+
+async function goForm() {
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("formPage").style.display = "block";
+
+  // 🔥 サーバー起動（wake）
+  try {
+    await fetch(SERVER + "/wake");
+  } catch (e) {
+    console.log("wake失敗（無視OK）");
+  }
+}
+
+// フォーム → メニュー
+function goMenu() {
+  document.getElementById("menu").style.display = "block";
+  document.getElementById("formPage").style.display = "none";
+  document.getElementById("adminPage").style.display = "none";
+}
+  
 // ===== 通知（←ここは元のまま）=====
 async function start() {
   const permission = await Notification.requestPermission();
@@ -190,6 +249,23 @@ function urlBase64ToUint8Array(base64String) {
 
   const rawData = atob(base64);
   return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+const ADMIN_PASSWORD = "0923"; // ←好きに変えてOK
+function goAdmin() {
+  document.getElementById("menu").style.display = "none";
+  document.getElementById("adminPage").style.display = "block";
+}
+
+function checkPass() {
+  const input = document.getElementById("adminPass").value;
+  if (input === ADMIN_PASSWORD) {
+    document.getElementById("adminContent").style.display = "block";
+    document.getElementById("adminPass").value = "";
+    alert("ログイン成功");
+  } else {
+    alert("パスワード違う");
+  }
 }
 </script>
 
