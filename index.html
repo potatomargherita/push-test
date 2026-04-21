@@ -92,9 +92,9 @@
   <select id="status">
     <option value="欠席">欠席</option>
     <option value="遅刻">遅刻</option>
-    <option value="遅刻">早退</option>
-    <option value="遅刻">ミー早</option>
-    <option value="遅刻">中抜け</option>
+    <option value="早退">早退</option>
+    <option value="ミー早">ミー早</option>
+    <option value="中抜け">中抜け</option>
   </select><br>
 
   <input id="reason" placeholder="理由"><br>
@@ -235,6 +235,11 @@ async function sendAbsence() {
     });
 
     alert("送信成功！");
+
+    document.getElementById("name").value = "";
+    document.getElementById("grade").value = "";
+    document.getElementById("part").value = "";
+    document.getElementById("reason").value = "";
   } catch (e) {
     alert("送信失敗...");
     console.error(e);
