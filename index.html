@@ -40,6 +40,7 @@
   <h1>部活アプリ</h1>
   <button onclick="goForm()">欠席連絡送信</button>
   <button onclick="goAdmin()">管理者ページ</button>
+  <button onclick="goPage()">カレンダー</button>
 </div>
 
 <!-- ===== フォーム画面 ===== -->
@@ -272,6 +273,10 @@ function checkPass() {
   } else {
     alert("パスワード違う");
   }
+}
+
+function goPage() {
+  window.location.href = 'https://www.example.com';
 }
 </script>
 
